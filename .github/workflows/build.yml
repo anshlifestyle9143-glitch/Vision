@@ -18,6 +18,7 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
+          pip install python-for-android==2024.1.21
           yes | buildozer android debug
 
       - name: Upload APK
