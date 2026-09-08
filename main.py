@@ -6,10 +6,40 @@ from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 import requests
 import os
-try:
-    from plyer import tts
-except Exception:
-    tts = None
+from jnius import autoclass, PythonJavaClass, java_method
+
+TextToSpeech = autoclass('android.speech.tts.TextToSpeech')
+Locale = autoclass('java.util.Locale')
+PythonActivity = autoclass('org.kivy.android.PythonActivity')
+
+class TTSListener(PythonJavaClass):
+    __javainterfaces__ = ['android/speech/tts/TextToSpeech$OnInitListener']
+    __javacontext__ = 'app'
+
+    def __init__(self, on_ready):
+        super().__init__()
+        self.on_ready = on_ready
+
+    @java_method('(I)V')
+    def onInit(self, status):
+        self.on_ready(status)
+
+tts_engine = None
+
+def init_tts():
+    global tts_engine
+    def on_ready(status):
+        if status == 0 and tts_engine:
+            tts_engine.setLanguage(Locale('hi', 'IN'))
+    listener = TTSListener(on_ready)
+    tts_engine = TextToSpeech(PythonActivity.mActivity, listener)
+
+def speak(text):
+    if tts_engine:
+        try:
+            tts_engine.speak(text, TextToSpeech.QUEUE_FLUSH, None, None)
+        except Exception as e:
+            print(f"TTS error: {e}")
 
 API_KEY = os.environ.get("GEMINI_API_KEY", "")
 URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key={API_KEY}"
@@ -22,6 +52,8 @@ Tum concise, intelligent aur helpful jawab dete ho, bina zyada dramatic hue."""
 
 class VisionApp(App):
     def build(self):
+        def on_start(self):
+        init_tts()
         self.chat_history = []
         layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
@@ -54,7 +86,7 @@ class VisionApp(App):
         self.reply_label.text += f"\n\nYou: {user_input}"
         if tts:
             try:
-                tts.speak(message=reply)
+                speak(reply)
             except Exception:
                 pass
 
