@@ -6,7 +6,10 @@ from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 import requests
 import os
-from plyer import tts
+try:
+    from plyer import tts
+except Exception:
+    tts = None
 
 API_KEY = os.environ.get("GEMINI_API_KEY", "")
 URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key={API_KEY}"
@@ -49,10 +52,11 @@ class VisionApp(App):
             return
         self.input_box.text = ""
         self.reply_label.text += f"\n\nYou: {user_input}"
-        try:
-            tts.speak(message=reply)
-        except Exception:
-            pass
+        if tts:
+            try:
+                tts.speak(message=reply)
+            except Exception:
+                pass
 
         self.chat_history.append({"role": "user", "parts": [{"text": user_input}]})
         payload = {
