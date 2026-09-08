@@ -12,7 +12,7 @@ orientation = portrait
 osx.python_version = 3
 osx.kivy_version = 1.9.1
 fullscreen = 0
-p4a.branch = 2024.1.21
+p4a.branch = v2024.01.21
 
 [buildozer]
 log_level = 2
