@@ -5,7 +5,7 @@ package.domain = org.vision
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 version = 0.1
-requirements = python3,kivy,requests
+requirements = python3,kivy==2.3.1,requests,plyer
 android.archs = arm64-v8a
 android.accept_sdk_license = True
 orientation = portrait
